@@ -1,6 +1,5 @@
 data:extend({
     {
-        type = "item",
         name = "statsd-combinator",
         icon = "__factorystatsd__/graphics/icons/statsd-combinator.png",
         icon_size = 64,
