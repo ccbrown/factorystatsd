@@ -1,0 +1,11 @@
+{
+    "name": "factorystatsd",
+    "version": "0.1.0",
+    "title": "factorystatsd",
+    "author": "ccbrown",
+    "factorio_version": "1.1",
+    "dependencies": [
+        "base >= 1.1"
+    ],
+    "description": "This mod adds a placeable item that transmits circuit signals to StatsD."
+}
