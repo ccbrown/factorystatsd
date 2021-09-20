@@ -69,6 +69,8 @@ local function on_gui_opened(event)
             caption = status.caption,
         }
 
+        local content_width = 550
+
         local preview_frame = content_frame.add{
             type = "frame",
             name = "preview_frame",
@@ -81,9 +83,76 @@ local function on_gui_opened(event)
             name = "preview",
         }
         -- for some reason these have to be set after creating the preview
-        preview.style.width = 375
+        preview.style.width = content_width
         preview.style.height = 150
         preview.entity = event.entity
+
+        local prefix_label = content_frame.add{
+            type = "label",
+            caption = {"statsd-combinator-ui.prefix"},
+            style = "bold_label",
+        }
+        prefix_label.style.top_margin = 8
+
+        local prefix_description_label = content_frame.add{
+            type = "label",
+            style = "description_label",
+            caption = {"statsd-combinator-ui.prefix-description"},
+            single_line = false,
+        }
+        prefix_description_label.style.maximal_width = content_width
+        prefix_description_label.style.bottom_margin = 4
+        prefix_description_label.style.single_line = false
+
+        content_frame.add{
+            type = "textfield",
+            text = "factorio.",
+        }
+
+        local tags_label = content_frame.add{
+            type = "label",
+            caption = {"statsd-combinator-ui.tags"},
+            style = "bold_label",
+        }
+        tags_label.style.top_margin = 8
+
+        local tags_description_label = content_frame.add{
+            type = "label",
+            style = "description_label",
+            caption = {"statsd-combinator-ui.tags-description"},
+            single_line = false,
+        }
+        tags_description_label.style.maximal_width = content_width
+        tags_description_label.style.bottom_margin = 4
+        tags_description_label.style.single_line = false
+
+        content_frame.add{
+            type = "textfield",
+            text = "",
+        }
+
+        local absent_signals = content_frame.add{
+            type = "label",
+            caption = {"statsd-combinator-ui.absent-signals"},
+            style = "bold_label",
+        }
+        absent_signals.style.top_margin = 8
+
+        local absent_signals_flow = content_frame.add{
+            type = "flow",
+            name = "absent_signals_flow",
+        }
+
+        local absent_signals_checkbox = absent_signals_flow.add{
+            type = "checkbox",
+            state = false,
+        }
+        absent_signals_checkbox.style.top_margin = 3
+
+        absent_signals_flow.add{
+            type = "label",
+            caption = {"statsd-combinator-ui.treat-absent-signals-as-zero"},
+        }
 
 		player.opened = frame
 
