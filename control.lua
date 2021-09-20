@@ -222,6 +222,16 @@ local function build_statsd_combinator_gui(player, entity)
     }
     absent_signals.style.top_margin = 8
 
+    local absent_signals_description_label = content_frame.add{
+        type = "label",
+        style = "description_label",
+        caption = {"statsd-combinator-ui.absent-signals-description"},
+        single_line = false,
+    }
+    absent_signals_description_label.style.maximal_width = GUI_CONTENT_WIDTH
+    absent_signals_description_label.style.bottom_margin = 4
+    absent_signals_description_label.style.single_line = false
+
     local absent_signals_flow = content_frame.add{
         type = "flow",
         name = "absent_signals_setting",
@@ -302,6 +312,65 @@ local function on_gui_click(event)
 end
 script.on_event(defines.events.on_gui_click, on_gui_click)
 
+local function write_server_file(path, data)
+    if game.is_multiplayer() then
+        game.write_file(path, data, false, 0)
+    else
+        game.write_file(path, data)
+    end
+end
+
+local function export_game_data()
+    local data = {
+        virtual_signal_names = {},
+        item_names = {},
+        fluid_names = {},
+    }
+
+    for _, p in pairs(game.virtual_signal_prototypes) do
+        table.insert(data.virtual_signal_names, p.name)
+    end
+    for _, p in pairs(game.fluid_prototypes) do
+        table.insert(data.fluid_names, p.name)
+    end
+    for _, p in pairs(game.item_prototypes) do
+        table.insert(data.item_names, p.name)
+    end
+
+    write_server_file("factoriostatsd-game-data.json", game.table_to_json(data))
+end
+
+local function export_samples()
+    local samples = {
+        entities = {},
+    }
+    for _, surface in pairs(game.surfaces) do
+        local entities = surface.find_entities_filtered{name = "statsd-combinator"}
+        for _, entity in pairs(entities) do
+            if entity.status == defines.entity_status.working then
+                local settings = entity_settings(entity)
+                local entity_data = {
+                    settings = settings,
+                }
+                local red = entity.get_circuit_network(defines.wire_type.red, defines.circuit_connector_id.combinator_input)
+                if red then
+                    entity_data.red_signals = red.signals
+                end
+                local green = entity.get_circuit_network(defines.wire_type.green, defines.circuit_connector_id.combinator_input)
+                if green then
+                    entity_data.green_signals = green.signals
+                end
+                table.insert(samples.entities, entity_data)
+            end
+        end
+    end
+    write_server_file("factoriostatsd-samples.json", game.table_to_json(samples))
+end
+
+local SAMPLE_TICK_INTERVAL = 60
+
+local should_export_game_data = true
+
 local function on_tick(event)
     for _, player in pairs(game.players) do
         local sc_frame = player.gui.screen.statsd_combinator;
@@ -309,6 +378,16 @@ local function on_tick(event)
             local entity = sc_frame.content_frame.preview_frame.preview.entity
             refresh_statsd_combinator_gui(sc_frame, entity)
         end
+    end
+
+    if should_export_game_data then
+        export_game_data()
+        should_export_game_data = false
+    end
+
+    local tick_interval = math.ceil(SAMPLE_TICK_INTERVAL * game.speed)
+    if event.tick % tick_interval then
+        export_samples()
     end
 end
 script.on_event(defines.events.on_tick, on_tick)
