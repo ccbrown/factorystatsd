@@ -337,7 +337,7 @@ local function export_game_data()
         table.insert(data.item_names, p.name)
     end
 
-    write_server_file("factoriostatsd-game-data.json", game.table_to_json(data))
+    write_server_file("factorystatsd-game-data.json", game.table_to_json(data))
 end
 
 local function export_samples()
@@ -366,7 +366,7 @@ local function export_samples()
             end
         end
     end
-    write_server_file("factoriostatsd-samples.json", game.table_to_json(samples))
+    write_server_file("factorystatsd-samples.json", game.table_to_json(samples))
 end
 
 local SAMPLE_TICK_INTERVAL = 60

@@ -1,6 +1,6 @@
-# factoriostatsd
+# factorystatsd
 
-factoriostatsd is a Factorio mod that allows you to forward metrics to statsd. In the spirit of factory building games, it provides a primitive yet powerful building block: the StatsD Combinator.
+factorystatsd is a Factorio mod that allows you to forward metrics to statsd. In the spirit of factory building games, it provides a primitive yet powerful building block: the StatsD Combinator.
 
 ![StatsD Combinator](screenshots/statsd-combinator.jpg)
 
@@ -16,11 +16,11 @@ The Datadog agent runs in the background and listens for metrics sent to it via 
 
 ### Install the Mod
 
-Install factoriostatsd like any other mode: Drop it into the mod subdirectory in Factorio's user data directory. Start up the game and confirm that the mod loads.
+Install factorystatsd like any other mode: Drop it into the mod subdirectory in Factorio's user data directory. Start up the game and confirm that the mod loads.
 
 ### Run the Forwarder
 
-Factorio mods can't communicate with the agent directly. Instead, factoriostatsd writes metrics to the filesystem, and a forwarder must be used to bridge the gap.
+Factorio mods can't communicate with the agent directly. Instead, factorystatsd writes metrics to the filesystem, and a forwarder must be used to bridge the gap.
 
 In this directory, there is a script named "forwarder.py". Install Python, then run it with the `--help` argument to see the available options. The most important ones are `--factorio-script-output` and `--statsd-flavor`:
 

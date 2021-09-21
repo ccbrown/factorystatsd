@@ -111,8 +111,8 @@ if __name__ == '__main__':
 
     logging.info('forwarding data from ' + args.factorio_script_output)
 
-    data_path = os.path.join(args.factorio_script_output, 'factoriostatsd-game-data.json')
-    samples_path = os.path.join(args.factorio_script_output, 'factoriostatsd-samples.json')
+    data_path = os.path.join(args.factorio_script_output, 'factorystatsd-game-data.json')
+    samples_path = os.path.join(args.factorio_script_output, 'factorystatsd-samples.json')
 
     last_game_data_mod_time = 0
     game_data = None
