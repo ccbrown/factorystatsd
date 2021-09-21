@@ -30,9 +30,9 @@ local DEFAULT_STATSD_COMBINATOR_SETTINGS = {
 }
 
 local function entity_settings(entity)
-    local settings = global.entity_settings[entity.unit_number]
-    if settings then
-        return settings
+    local combinator = global.statsd_combinators[entity.unit_number]
+    if combinator then
+        return combinator.settings
     end
     return DEFAULT_STATSD_COMBINATOR_SETTINGS
 end
@@ -41,7 +41,10 @@ local function update_entity_settings(entity, update)
     local prev_settings = entity_settings(entity)
     local new_settings = table.deepcopy(prev_settings)
     update(new_settings)
-    global.entity_settings[entity.unit_number] = new_settings
+    global.statsd_combinators[entity.unit_number] = {
+        entity = entity,
+        settings = new_settings,
+    }
 end
 
 local function build_text_option_edit_mode_gui(editor_flow, value)
@@ -344,9 +347,13 @@ local function export_samples()
     local samples = {
         entities = {},
     }
-	for _, entity in pairs(global.statsd_combinators) do
-		if entity.status == defines.entity_status.working then
-			local settings = entity_settings(entity)
+    local invalid_unit_numbers = {}
+	for unit_number, combinator in pairs(global.statsd_combinators) do
+        local entity = combinator.entity
+        if not entity.valid then
+            table.insert(invalid_unit_numbers, unit_number)
+        elseif entity.status == defines.entity_status.working then
+			local settings = combinator.settings
 			if settings.name then
 				local entity_data = {
 					settings = settings,
@@ -362,6 +369,9 @@ local function export_samples()
 				table.insert(samples.entities, entity_data)
 			end
 		end
+    end
+    for _, unit_number in pairs(invalid_unit_numbers) do
+        table.remove(global.statsd_combinators, unit_number)
     end
     write_server_file("factorystatsd-samples.json", game.table_to_json(samples))
 end
@@ -411,7 +421,6 @@ script.on_event(defines.events.on_gui_checked_state_changed, on_gui_checked_stat
 
 local function on_entity_cloned(event)
     if event.source.name == "statsd-combinator" and event.destination.name == "statsd-combinator" then
-		global.statsd_combinators[event.destination.unit_number] = event.destination
         local source_settings = entity_settings(event.source)
         update_entity_settings(event.destination, function(settings)
             for k, v in pairs(source_settings) do
@@ -423,7 +432,6 @@ end
 script.on_event({defines.events.on_entity_cloned, defines.events.on_entity_settings_pasted}, on_entity_cloned)
 
 local function on_entity_destroyed(event)
-    table.remove(global.entity_settings, event.unit_number)
     table.remove(global.statsd_combinators, event.unit_number)
 end
 script.on_event(defines.events.on_entity_destroyed, on_entity_destroyed)
@@ -434,7 +442,6 @@ local function on_entity_created(event)
         entity = event.created_entity
     end
     if entity.name == "statsd-combinator" then
-		global.statsd_combinators[entity.unit_number] = entity
 		if event.tags then
 			update_entity_settings(entity, function(settings)
 				for k, v in pairs(event.tags) do
@@ -475,19 +482,38 @@ function on_player_setup_blueprint(event)
 end
 script.on_event(defines.events.on_player_setup_blueprint, on_player_setup_blueprint)
 
+local function legacy_entity_settings(entity)
+    if global.statsd_combinators then
+        local combinator = global.statsd_combinators[entity.unit_number]
+        if combinator then
+            return combinator.settings
+        end
+    end
+    -- read from legacy location
+    if global.entity_settings then
+        local settings = global.entity_settings[entity.unit_number]
+        if settings then
+            return settings
+        end
+    end
+    return DEFAULT_STATSD_COMBINATOR_SETTINGS
+end
+
 function find_statsd_combinators()
 	local ret = {}
     for _, surface in pairs(game.surfaces) do
         local entities = surface.find_entities_filtered{name = "statsd-combinator"}
 		for _, entity in pairs(entities) do
-			ret[entity.unit_number] = entity
+			ret[entity.unit_number] = {
+                entity = entity,
+                settings = legacy_entity_settings(entity),
+            }
 		end
 	end
 	return ret
 end
 
 script.on_init(function ()
-    global.entity_settings = {}
 	global.statsd_combinators = find_statsd_combinators()
 end)
 
