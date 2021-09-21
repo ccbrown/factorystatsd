@@ -29,6 +29,6 @@ In this directory, there is a script named "forwarder.py". Install Python, then 
 
 ### Build Some Dashboards
 
-You should now be able to find your metrics in Datadog. :tada:
+Play the game and send some signals to the StatsD combinator. You should then be able to find your metrics in Datadog! :tada:
 
 ![Datadog](screenshots/datadog.jpg)
