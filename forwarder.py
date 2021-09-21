@@ -99,7 +99,7 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description='forwards metrics from factorio to statsd')
     parser.add_argument('--factorio-script-output', type=str, default=default_script_output, help='the path to factorio\'s script-output directory (default: {})'.format(default_script_output))
-    parser.add_argument('--statsd-flavor', type=str, choices=['vanilla', 'dogstatsd'], default='statsd', help='the flavor of statsd to use (note that vanilla statsd does not currently support tags)')
+    parser.add_argument('--statsd-flavor', type=str, choices=['vanilla', 'dogstatsd'], default='vanilla', help='the flavor of statsd to use (note that vanilla statsd does not currently support tags)')
     parser.add_argument('--statsd-port', type=int, default=8125, help='the port that statsd is listening on (default: 8125)')
     parser.add_argument('--statsd-host', type=str, default='127.0.0.1', help='the host where statsd is listening (default: 127.0.0.1)')
     args = parser.parse_args()
