@@ -344,27 +344,24 @@ local function export_samples()
     local samples = {
         entities = {},
     }
-    for _, surface in pairs(game.surfaces) do
-        local entities = surface.find_entities_filtered{name = "statsd-combinator"}
-        for _, entity in pairs(entities) do
-            if entity.status == defines.entity_status.working then
-                local settings = entity_settings(entity)
-                if settings.name then
-                    local entity_data = {
-                        settings = settings,
-                    }
-                    local red = entity.get_circuit_network(defines.wire_type.red, defines.circuit_connector_id.combinator_input)
-                    if red then
-                        entity_data.red_signals = red.signals
-                    end
-                    local green = entity.get_circuit_network(defines.wire_type.green, defines.circuit_connector_id.combinator_input)
-                    if green then
-                        entity_data.green_signals = green.signals
-                    end
-                    table.insert(samples.entities, entity_data)
-                end
-            end
-        end
+	for _, entity in pairs(global.statsd_combinators) do
+		if entity.status == defines.entity_status.working then
+			local settings = entity_settings(entity)
+			if settings.name then
+				local entity_data = {
+					settings = settings,
+				}
+				local red = entity.get_circuit_network(defines.wire_type.red, defines.circuit_connector_id.combinator_input)
+				if red then
+					entity_data.red_signals = red.signals
+				end
+				local green = entity.get_circuit_network(defines.wire_type.green, defines.circuit_connector_id.combinator_input)
+				if green then
+					entity_data.green_signals = green.signals
+				end
+				table.insert(samples.entities, entity_data)
+			end
+		end
     end
     write_server_file("factorystatsd-samples.json", game.table_to_json(samples))
 end
@@ -414,6 +411,7 @@ script.on_event(defines.events.on_gui_checked_state_changed, on_gui_checked_stat
 
 local function on_entity_cloned(event)
     if event.source.name == "statsd-combinator" and event.destination.name == "statsd-combinator" then
+		global.statsd_combinators[event.destination.unit_number] = event.destination
         local source_settings = entity_settings(event.source)
         update_entity_settings(event.destination, function(settings)
             for k, v in pairs(source_settings) do
@@ -426,6 +424,7 @@ script.on_event({defines.events.on_entity_cloned, defines.events.on_entity_setti
 
 local function on_entity_destroyed(event)
     table.remove(global.entity_settings, event.unit_number)
+    table.remove(global.statsd_combinators, event.unit_number)
 end
 script.on_event(defines.events.on_entity_destroyed, on_entity_destroyed)
 
@@ -434,12 +433,15 @@ local function on_entity_created(event)
     if not entity then
         entity = event.created_entity
     end
-    if entity.name == "statsd-combinator" and event.tags then
-        update_entity_settings(entity, function(settings)
-            for k, v in pairs(event.tags) do
-                settings[k] = v
-            end
-        end)
+    if entity.name == "statsd-combinator" then
+		global.statsd_combinators[entity.unit_number] = entity
+		if event.tags then
+			update_entity_settings(entity, function(settings)
+				for k, v in pairs(event.tags) do
+					settings[k] = v
+				end
+			end)
+		end
     end
 end
 script.on_event({defines.events.on_built_entity, defines.events.on_robot_built_entity, defines.events.script_raised_revive}, on_entity_created)
@@ -473,6 +475,22 @@ function on_player_setup_blueprint(event)
 end
 script.on_event(defines.events.on_player_setup_blueprint, on_player_setup_blueprint)
 
+function find_statsd_combinators()
+	local ret = {}
+    for _, surface in pairs(game.surfaces) do
+        local entities = surface.find_entities_filtered{name = "statsd-combinator"}
+		for _, entity in pairs(entities) do
+			ret[entity.unit_number] = entity
+		end
+	end
+	return ret
+end
+
 script.on_init(function ()
     global.entity_settings = {}
+	global.statsd_combinators = find_statsd_combinators()
+end)
+
+script.on_configuration_changed(function (data)
+	global.statsd_combinators = find_statsd_combinators()
 end)
