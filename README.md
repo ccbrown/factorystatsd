@@ -31,4 +31,4 @@ Inside the mod directory or zip file, there is a script named "forwarder.py". In
 
 Play the game and send some signals to the StatsD combinator. You should then be able to find your metrics in Datadog! :tada:
 
-![Datadog](screenshots/datadog.jpg)
+![Datadog](screenshots/datadog.png)
