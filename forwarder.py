@@ -7,15 +7,15 @@ import socket
 import time
 
 
-"""
-Makes the name conform to common naming conventions and limitations:
-
-    * The result will start with a letter.
-    * The result will only contain alphanumerics, underscores, and periods.
-    * The result will be lowercase.
-    * The result will not exceed 200 characters.
-"""
 def normalize_metric_name(name):
+    """
+    Makes the name conform to common naming conventions and limitations:
+
+        * The result will start with a letter.
+        * The result will only contain alphanumerics, underscores, and periods.
+        * The result will be lowercase.
+        * The result will not exceed 200 characters.
+    """
     if not name[0].isalpha():
         name = 'x' + name
     name = name.lower()
@@ -146,9 +146,6 @@ if __name__ == '__main__':
                 for packet in packets:
                     sock.sendto(packet, (args.statsd_host, args.statsd_port))
                 logging.info('sent {} packets to statsd'.format(len(packets)))
-        except KeyboardInterrupt:
-            time.sleep(0.1)
-            break
-        except:
+        except Exception:
             logging.exception('forwarder exception')
             time.sleep(1.0)

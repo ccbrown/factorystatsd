@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import unittest
-from forwarder import *
+from forwarder import statsd_lines_from_samples_data, statsd_packets_from_lines
+
 
 class TestForwarder(unittest.TestCase):
     def test_statsd_lines_from_samples_data(self):
@@ -44,16 +45,15 @@ class TestForwarder(unittest.TestCase):
 
         test_samples['entities'][0]['settings']['absent_signals'] = 'treat-as-0'
         lines = statsd_lines_from_samples_data(game_data, test_samples, 'dogstatsd')
-        self.assertItemsEqual(lines, [
+        self.assertCountEqual(lines, [
             'my_metric:0|g|#base:alpha,planet:nauvis,ores,signal_type:virtual,signal_name:signal-A',
             'my_metric:2|g|#base:alpha,planet:nauvis,ores,signal_type:item,signal_name:coal',
             'my_metric:0|g|#base:alpha,planet:nauvis,ores,signal_type:fluid,signal_name:water',
         ])
 
-
     def test_statsd_packets_from_lines(self):
         packets = statsd_packets_from_lines(['foo', 'bar', 'baz'], 7)
-        self.assertEqual(packets, ['foo\nbar', 'baz'])
+        self.assertEqual(packets, [b'foo\nbar', b'baz'])
 
 
 if __name__ == '__main__':
