@@ -22,4 +22,5 @@ jobs:
       - name: Archive
         uses: actions/upload-artifact@v2
         with:
+          name: factoriostatsd.zip
           path: factoriostatsd.zip
