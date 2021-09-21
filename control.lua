@@ -441,14 +441,12 @@ local function on_entity_created(event)
     if not entity then
         entity = event.created_entity
     end
-    if entity.name == "statsd-combinator" then
-		if event.tags then
-			update_entity_settings(entity, function(settings)
-				for k, v in pairs(event.tags) do
-					settings[k] = v
-				end
-			end)
-		end
+    if entity.name == "statsd-combinator" and event.tags then
+        update_entity_settings(entity, function(settings)
+            for k, v in pairs(event.tags) do
+                settings[k] = v
+            end
+        end)
     end
 end
 script.on_event({defines.events.on_built_entity, defines.events.on_robot_built_entity, defines.events.script_raised_revive}, on_entity_created)
