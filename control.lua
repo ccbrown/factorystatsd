@@ -24,7 +24,7 @@ local ABSENT_SIGNALS = {
 }
 
 local DEFAULT_STATSD_COMBINATOR_SETTINGS = {
-    prefix = "factorio.",
+    name = "",
     tags = "",
     absent_signals = ABSENT_SIGNALS.ignore,
 }
@@ -122,9 +122,9 @@ local function refresh_statsd_combinator_gui(frame, entity)
 
     local settings = entity_settings(entity)
 
-    local prefix_gui = frame.content_frame.prefix_setting.editor_flow
-    if prefix_gui.label then
-        prefix_gui.label.caption = settings.prefix
+    local name_gui = frame.content_frame.name_setting.editor_flow
+    if name_gui.label then
+        name_gui.label.caption = settings.name
     end
 
     local tags_gui = frame.content_frame.tags_setting.editor_flow
@@ -202,9 +202,9 @@ local function build_statsd_combinator_gui(player, entity)
     preview.entity = entity
 
     build_text_option_gui(content_frame, {
-        title = {"statsd-combinator-ui.prefix"},
-        description = {"statsd-combinator-ui.prefix-description"},
-        name = "prefix_setting",
+        title = {"statsd-combinator-ui.name"},
+        description = {"statsd-combinator-ui.name-description"},
+        name = "name_setting",
         value = "",
     })
 
@@ -285,8 +285,8 @@ local function on_gui_confirmed(event)
         local entity = sc_frame.content_frame.preview_frame.preview.entity
         local value = editor_flow.factorystatsd_text_option_textfield.text
         update_entity_settings(entity, function(settings)
-            if editor_flow.parent.name == "prefix_setting" then
-                settings.prefix = value
+            if editor_flow.parent.name == "name_setting" then
+                settings.name = value
             else
                 settings.tags = value
             end
@@ -349,18 +349,20 @@ local function export_samples()
         for _, entity in pairs(entities) do
             if entity.status == defines.entity_status.working then
                 local settings = entity_settings(entity)
-                local entity_data = {
-                    settings = settings,
-                }
-                local red = entity.get_circuit_network(defines.wire_type.red, defines.circuit_connector_id.combinator_input)
-                if red then
-                    entity_data.red_signals = red.signals
+                if settings.name then
+                    local entity_data = {
+                        settings = settings,
+                    }
+                    local red = entity.get_circuit_network(defines.wire_type.red, defines.circuit_connector_id.combinator_input)
+                    if red then
+                        entity_data.red_signals = red.signals
+                    end
+                    local green = entity.get_circuit_network(defines.wire_type.green, defines.circuit_connector_id.combinator_input)
+                    if green then
+                        entity_data.green_signals = green.signals
+                    end
+                    table.insert(samples.entities, entity_data)
                 end
-                local green = entity.get_circuit_network(defines.wire_type.green, defines.circuit_connector_id.combinator_input)
-                if green then
-                    entity_data.green_signals = green.signals
-                end
-                table.insert(samples.entities, entity_data)
             end
         end
     end
@@ -386,7 +388,7 @@ local function on_tick(event)
     end
 
     local tick_interval = math.ceil(SAMPLE_TICK_INTERVAL * game.speed)
-    if event.tick % tick_interval then
+    if event.tick % tick_interval == 0 then
         export_samples()
     end
 end
