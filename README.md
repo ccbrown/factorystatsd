@@ -25,7 +25,7 @@ Factorio mods can't communicate with the agent directly. Instead, factorystatsd 
 In this directory, there is a script named "forwarder.py". Install Python, then run it with the `--help` argument to see the available options. The most important ones are `--factorio-script-output` and `--statsd-flavor`:
 
 * `--factorio-script-output` must be the path to your game's script-output directory. If you run forwarder.py from your mod's installation directory, this is determined automatically. Otherwise you'll need to provide it.
-* `--statsd-flavor` can be used to tell the forwarder what StatsD extensions it's allowed to use. For DataDog tags to work, you must set this to "dogstatsd".
+* `--statsd-flavor` can be used to tell the forwarder what StatsD extensions it's allowed to use. For Datadog tags to work, you must set this to "dogstatsd".
 
 ### Build Some Dashboards
 
