@@ -16,7 +16,7 @@ The Datadog agent runs in the background and listens for metrics sent to it via 
 
 ### Install the Mod
 
-Install factorystatsd like any other mode: Use the Factorio menu or download it and drop it into the mods subdirectory.
+Install factorystatsd like any other mod: Use the Factorio menu or download it and drop it into the mods subdirectory.
 
 ### Run the Forwarder
 
