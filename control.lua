@@ -259,24 +259,24 @@ local function build_statsd_combinator_gui(player, entity)
 end
 
 local function on_gui_opened(event)
-	if event.entity and event.entity.name == "statsd-combinator" then
+    if event.entity and event.entity.name == "statsd-combinator" then
         local player = game.get_player(event.player_index)
         if player.gui.screen.statsd_combinator then
             player.gui.screen.statsd_combinator.destroy()
         end
 
         build_statsd_combinator_gui(player, event.entity)
-	end
+    end
 end
 script.on_event(defines.events.on_gui_opened, on_gui_opened)
 
 local function on_gui_closed(event)
-	if event.element then
+    if event.element then
         local player = game.get_player(event.player_index)
         if event.element == player.gui.screen.statsd_combinator then
             player.gui.screen.statsd_combinator.destroy()
         end
-	end
+    end
 end
 script.on_event(defines.events.on_gui_closed, on_gui_closed)
 
@@ -349,29 +349,29 @@ local function export_samples()
         ticks = game.ticks_played,
     }
     local invalid_unit_numbers = {}
-	for unit_number, combinator in pairs(global.statsd_combinators) do
+    for unit_number, combinator in pairs(global.statsd_combinators) do
         local entity = combinator.entity
         if not entity.valid then
             table.insert(invalid_unit_numbers, unit_number)
         elseif entity.status == defines.entity_status.working then
-			local settings = combinator.settings
-			if settings.name then
-				local entity_data = {
+            local settings = combinator.settings
+            if settings.name then
+                local entity_data = {
                     unit_number = entity.unit_number,
                     surface_index = entity.surface.index,
-					settings = settings,
-				}
-				local red = entity.get_circuit_network(defines.wire_type.red, defines.circuit_connector_id.combinator_input)
-				if red then
-					entity_data.red_signals = red.signals
-				end
-				local green = entity.get_circuit_network(defines.wire_type.green, defines.circuit_connector_id.combinator_input)
-				if green then
-					entity_data.green_signals = green.signals
-				end
-				table.insert(samples.entities, entity_data)
-			end
-		end
+                    settings = settings,
+                }
+                local red = entity.get_circuit_network(defines.wire_type.red, defines.circuit_connector_id.combinator_input)
+                if red then
+                    entity_data.red_signals = red.signals
+                end
+                local green = entity.get_circuit_network(defines.wire_type.green, defines.circuit_connector_id.combinator_input)
+                if green then
+                    entity_data.green_signals = green.signals
+                end
+                table.insert(samples.entities, entity_data)
+            end
+        end
     end
     for _, unit_number in pairs(invalid_unit_numbers) do
         table.remove(global.statsd_combinators, unit_number)
@@ -501,23 +501,23 @@ local function legacy_entity_settings(entity)
 end
 
 function find_statsd_combinators()
-	local ret = {}
+    local ret = {}
     for _, surface in pairs(game.surfaces) do
         local entities = surface.find_entities_filtered{name = "statsd-combinator"}
-		for _, entity in pairs(entities) do
-			ret[entity.unit_number] = {
+        for _, entity in pairs(entities) do
+            ret[entity.unit_number] = {
                 entity = entity,
                 settings = legacy_entity_settings(entity),
             }
-		end
-	end
-	return ret
+        end
+    end
+    return ret
 end
 
 script.on_init(function ()
-	global.statsd_combinators = find_statsd_combinators()
+    global.statsd_combinators = find_statsd_combinators()
 end)
 
 script.on_configuration_changed(function (data)
-	global.statsd_combinators = find_statsd_combinators()
+    global.statsd_combinators = find_statsd_combinators()
 end)
