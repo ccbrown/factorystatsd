@@ -14,13 +14,19 @@ def influxdb_from_samples_data(game_data, samples_data, client, args):
     write_api = client.write_api(write_options=SYNCHRONOUS)
     points = []
     logging.debug(f'writing data for {len(samples_data["entities"])} entities')
+
+    if 'ticks' in samples_data:
+        logging.debug(f'ticks: {samples_data["ticks"]}')
+        ticks = round(samples_data["ticks"] / 60.0)
+    else:
+        ticks = None
     for entity in samples_data['entities']:
         settings = entity['settings']
         if not settings['name']:
             logging.debug('unnamed combinator, skipping')
             continue
         logging.debug(f'writing data for {settings["name"]}')
-        
+
         tags = {pair.split('=')[0]: pair.split('=')[1] for pair in settings['tags'].split(',')}
         tags['combinator'] = settings['name']
         if 'surface' in entity:
@@ -28,25 +34,25 @@ def influxdb_from_samples_data(game_data, samples_data, client, args):
         if 'id' in entity:
             tags['id'] = entity['id']
 
-        for signal in entity.get('red_signals',[]):
+        for signal in entity.get('red_signals', []):
 
             p = Point(signal['signal']['name']).tag('circuit', 'red').tag('type', signal['signal']['type'])
             for key, tag in tags.items():
                 p.tag(key, tag)
             p.field('count', signal['count'])
-            if 'ticks' in entity:
-                p.time(entity['ticks'])
+            if ticks is not None:
+                p.time(ticks)
             points.append(p)
             logging.debug(f'writing red {signal["signal"]["name"]} for {signal["count"]}')
 
-        for signal in entity.get('green_signals',[]):
+        for signal in entity.get('green_signals', []):
             p = Point(signal['signal']['name']).tag('circuit', 'green').tag('type', signal['signal']['type'])
             for key, tag in tags.items():
                 p.tag(key, tag)
 
             p.field('count', signal['count'])
-            if 'ticks' in entity:
-                p.time(entity['ticks'])
+            if ticks is not None:
+                p.time(ticks)
             points.append(p)
             logging.debug(f'writing green {signal["signal"]["name"]} for {signal["count"]}')
 
