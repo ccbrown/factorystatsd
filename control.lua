@@ -346,6 +346,7 @@ end
 local function export_samples()
     local samples = {
         entities = {},
+        ticks = game.ticks_played,
     }
     local invalid_unit_numbers = {}
 	for unit_number, combinator in pairs(global.statsd_combinators) do
@@ -356,6 +357,8 @@ local function export_samples()
 			local settings = combinator.settings
 			if settings.name then
 				local entity_data = {
+                    id = entity.unit_number,
+                    surface = entity.surface.name,
 					settings = settings,
 				}
 				local red = entity.get_circuit_network(defines.wire_type.red, defines.circuit_connector_id.combinator_input)
