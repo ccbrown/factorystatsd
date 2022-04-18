@@ -23,6 +23,10 @@ def influxdb_from_samples_data(game_data, samples_data, client, args):
         
         tags = {pair.split('=')[0]: pair.split('=')[1] for pair in settings['tags'].split(',')}
         tags['combinator'] = settings['name']
+        if 'surface' in entity:
+            tags['surface'] = entity['surface']
+        if 'id' in entity:
+            tags['id'] = entity['id']
 
         for signal in entity.get('red_signals',[]):
 
@@ -30,6 +34,8 @@ def influxdb_from_samples_data(game_data, samples_data, client, args):
             for key, tag in tags.items():
                 p.tag(key, tag)
             p.field('count', signal['count'])
+            if 'ticks' in entity:
+                p.time(entity['ticks'])
             points.append(p)
             logging.debug(f'writing red {signal["signal"]["name"]} for {signal["count"]}')
 
@@ -39,6 +45,8 @@ def influxdb_from_samples_data(game_data, samples_data, client, args):
                 p.tag(key, tag)
 
             p.field('count', signal['count'])
+            if 'ticks' in entity:
+                p.time(entity['ticks'])
             points.append(p)
             logging.debug(f'writing green {signal["signal"]["name"]} for {signal["count"]}')
 
