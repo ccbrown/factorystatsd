@@ -29,10 +29,10 @@ def influxdb_from_samples_data(game_data, samples_data, client, args):
 
         tags = {pair.split('=')[0]: pair.split('=')[1] for pair in settings['tags'].split(',')}
         tags['combinator'] = settings['name']
-        if 'surface' in entity:
-            tags['surface'] = entity['surface']
-        if 'id' in entity:
-            tags['id'] = entity['id']
+        if 'surface_index' in entity:
+            tags['surface_index'] = entity['surface_index']
+        if 'unit_number' in entity:
+            tags['unit_number'] = entity['unit_number']
 
         for signal in entity.get('red_signals', []):
 
