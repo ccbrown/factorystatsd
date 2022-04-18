@@ -357,8 +357,8 @@ local function export_samples()
 			local settings = combinator.settings
 			if settings.name then
 				local entity_data = {
-                    id = entity.unit_number,
-                    surface = entity.surface.name,
+                    unit_number = entity.unit_number,
+                    surface_index = entity.surface.index,
 					settings = settings,
 				}
 				local red = entity.get_circuit_network(defines.wire_type.red, defines.circuit_connector_id.combinator_input)
