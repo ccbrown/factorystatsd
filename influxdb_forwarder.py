@@ -71,7 +71,7 @@ if __name__ == '__main__':
     parser.add_argument('--influxdb-bucket', type=str, default='factorio', help='the bucket to write to')
     args = parser.parse_args()
 
-    logging.basicConfig(level=logging.DEBUG)
+    logging.basicConfig(level=logging.INFO)
 
     if not os.path.exists(os.path.dirname(args.factorio_script_output)):
         logging.critical(f'factorio not found at {args.factorio_script_output}. please check --factorio-script-output')
