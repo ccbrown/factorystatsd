@@ -1,10 +1,12 @@
 #!/usr/bin/env python
 import argparse
 from asyncore import write
+import datetime
 import json
 import logging
 import os
 import time
+import arrow
 
 from influxdb_client import InfluxDBClient, Point
 from influxdb_client.client.write_api import SYNCHRONOUS
@@ -17,7 +19,7 @@ def influxdb_from_samples_data(game_data, samples_data, client, args):
 
     if 'ticks' in samples_data:
         logging.debug(f'ticks: {samples_data["ticks"]}')
-        ticks = round(samples_data["ticks"] / 60.0)
+        ticks = args.factorio_epoch.shift(seconds=samples_data["ticks"] / 60.0).datetime
     else:
         ticks = None
     for entity in samples_data['entities']:
@@ -61,6 +63,7 @@ def influxdb_from_samples_data(game_data, samples_data, client, args):
 
 if __name__ == '__main__':
     default_script_output = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), 'script-output')
+    default_epoch = arrow.get('2020-01-01', tzinfo=datetime.datetime.now(datetime.timezone.utc).astimezone().tzinfo)
 
     parser = argparse.ArgumentParser(description='forwards metrics from factorio to influxdb')
     parser.add_argument('--factorio-script-output', type=str, default=default_script_output, help=f'the path to factorio\'s script-output directory (default: {default_script_output})')
@@ -69,6 +72,7 @@ if __name__ == '__main__':
     parser.add_argument('--influxdb-org', type=str, help='the organization to use for influxdb reads and writes')
     parser.add_argument('--influxdb-token', type=str, help='the token for auth')
     parser.add_argument('--influxdb-bucket', type=str, default='factorio', help='the bucket to write to')
+    parser.add_argument('--factorio-epoch', type=datetime.datetime.fromisoformat(), default=default_epoch, help=f'the epoch in ISO8601 to start measurements from (default: {default_epoch})')
     args = parser.parse_args()
 
     logging.basicConfig(level=logging.INFO)
@@ -77,6 +81,10 @@ if __name__ == '__main__':
         logging.critical(f'factorio not found at {args.factorio_script_output}. please check --factorio-script-output')
 
     logging.info(f'forwarding data from {args.factorio_script_output}')
+
+    if args.factorio_epoch != default_epoch:
+        args.factorio_epoch = arrow.get(args.factorio_epoch)
+    logging.info(f'using epoch {args.factorio_epoch}')
 
     data_path = os.path.join(args.factorio_script_output, 'factorystatsd-game-data.json')
     samples_path = os.path.join(args.factorio_script_output, 'factorystatsd-samples.json')
