@@ -72,7 +72,7 @@ if __name__ == '__main__':
     parser.add_argument('--influxdb-org', type=str, help='the organization to use for influxdb reads and writes')
     parser.add_argument('--influxdb-token', type=str, help='the token for auth')
     parser.add_argument('--influxdb-bucket', type=str, default='factorio', help='the bucket to write to')
-    parser.add_argument('--factorio-epoch', type=datetime.datetime.fromisoformat(), default=default_epoch, help=f'the epoch in ISO8601 to start measurements from (default: {default_epoch})')
+    parser.add_argument('--factorio-epoch', type=datetime.datetime.fromisoformat, default=default_epoch, help=f'the epoch in ISO8601 to start measurements from (default: {default_epoch})')
     args = parser.parse_args()
 
     logging.basicConfig(level=logging.INFO)
